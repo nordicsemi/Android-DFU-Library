@@ -41,6 +41,8 @@
     <string name="dfu_settings_disable_resume_info">When the resume feature is disabled the app will not try to resume previously interrupted update.</string>
     <string name="dfu_settings_prepare_data_object_delay">Prepare object delay</string>
     <string name="dfu_settings_prepare_data_object_delay_info">The time required by the DFU bootloader to save the data object in flash memory. Shorter delays will increase upload speed, but may cause issues on some devices.</string>
+    <string name="dfu_settings_execute_init_delay">Execute init delay</string>
+    <string name="dfu_settings_execute_init_delay_info">The time the service will wait after sending the init packet and before executing it.</string>
     <string name="dfu_settings_reboot_time">Reboot time</string>
     <string name="dfu_settings_reboot_time_info">The time the device needs to reboot into the DFU bootloader mode. The app will delay scanning for the bootloader.</string>
     <string name="dfu_settings_scan_timeout">Scan timeout</string>

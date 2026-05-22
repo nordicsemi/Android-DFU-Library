@@ -83,6 +83,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 	private BluetoothGattCharacteristic mPacketCharacteristic;
 
 	private long prepareObjectDelay;
+	private long executeInitDelay;
 
 	private final SecureBluetoothCallback mBluetoothCallback = new SecureBluetoothCallback();
 
@@ -223,6 +224,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 		}
 
 		prepareObjectDelay = intent.getLongExtra(DfuBaseService.EXTRA_DATA_OBJECT_DELAY, 0);
+		executeInitDelay = intent.getLongExtra(DfuBaseService.EXTRA_INIT_EXECUTE_DELAY, 0);
 
 		try {
 			// Enable notifications
@@ -472,6 +474,8 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 		}
 
 		// Execute Init packet. It's better to execute it twice than not execute at all...
+		if (executeInitDelay > 0)
+			mService.waitFor(executeInitDelay);
 		logi("Executing init packet (Op Code = 4)");
 		writeExecute();
 		mService.sendLogBroadcast(DfuBaseService.LOG_LEVEL_APPLICATION, "Command object executed");

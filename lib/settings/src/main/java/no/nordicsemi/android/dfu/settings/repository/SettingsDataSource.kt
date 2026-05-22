@@ -53,6 +53,7 @@ private val DISABLE_RESUME = booleanPreferencesKey("disable_resume")
 private val FORCE_SCANNING_ADDRESS = booleanPreferencesKey("force_scanning_address")
 private val NUMBER_OF_POCKETS_KEY = intPreferencesKey("number_of_pockets")
 private val PREPARE_OBJECT_DELAY_KEY = intPreferencesKey("prepare_data_object_delay")
+private val EXECUTE_INIT_DELAY_KEY = intPreferencesKey("execute_init_delay")
 private val REBOOT_TIME_KEY = intPreferencesKey("reboot_time")
 private val SCAN_TIMEOUT_KEY = intPreferencesKey("scan_timeout")
 private val MTU = booleanPreferencesKey("requestMtu")
@@ -75,6 +76,7 @@ class SettingsDataSource @Inject constructor(
         context.dataStore.edit {
             it[PACKETS_RECEIPT_NOTIFICATION_KEY] = settings.packetsReceiptNotification
             it[PREPARE_OBJECT_DELAY_KEY] = settings.prepareDataObjectDelay
+            it[EXECUTE_INIT_DELAY_KEY] = settings.executeInitDelay
             it[REBOOT_TIME_KEY] = settings.rebootTime
             it[SCAN_TIMEOUT_KEY] = settings.scanTimeout
             it[NUMBER_OF_POCKETS_KEY] = settings.numberOfPackets
@@ -95,6 +97,7 @@ class SettingsDataSource @Inject constructor(
             this[EXTERNAL_MCU_KEY] ?: false,
             this[DISABLE_RESUME] ?: false,
             this[PREPARE_OBJECT_DELAY_KEY] ?: 400,
+            this[EXECUTE_INIT_DELAY_KEY] ?: 0,
             this[REBOOT_TIME_KEY] ?: 0,
             this[SCAN_TIMEOUT_KEY] ?: 2_000,
             this[MTU] ?: true,

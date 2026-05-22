@@ -39,6 +39,8 @@ internal data class OnNumberOfPocketsChange(val numberOfPockets: Int) : Settings
 
 internal data class OnPrepareDataObjectDelayChange(val delay: Int) : SettingsScreenViewEvent
 
+internal data class OnExecuteInitDelayChange(val delay: Int) : SettingsScreenViewEvent
+
 internal data class OnRebootTimeChange(val time: Int) : SettingsScreenViewEvent
 
 internal data class OnScanTimeoutChange(val timeout: Int) : SettingsScreenViewEvent

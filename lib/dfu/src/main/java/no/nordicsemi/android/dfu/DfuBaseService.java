@@ -279,6 +279,11 @@ public abstract class DfuBaseService extends IntentService implements DfuProgres
 	 */
 	public static final String EXTRA_DATA_OBJECT_DELAY = "no.nordicsemi.android.dfu.extra.EXTRA_DATA_OBJECT_DELAY";
 	/**
+	 * The duration of a delay that will be added after sending the Init Packet and before
+	 * executing it, in milliseconds. This defaults to 0 for backwards compatibility reason.
+	 */
+	public static final String EXTRA_INIT_EXECUTE_DELAY = "no.nordicsemi.android.dfu.extra.EXTRA_INIT_EXECUTE_DELAY";
+	/**
 	 * This property must contain a boolean value.
 	 * <p>
 	 * If true the Packet Receipt Notification procedure will be enabled.

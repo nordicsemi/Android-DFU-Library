@@ -110,6 +110,12 @@ class PrepareDataObjectDelaySettingsEvent(private val delay: Int) : DFUSettingsC
     override fun createBundle() = bundleOf(FirebaseParam.VALUE to delay)
 }
 
+class ExecuteInitDelaySettingsEvent(private val delay: Int) : DFUSettingsChangeEvent {
+    override val eventName: String = "EXECUTE_INIT_DELAY_EVENT"
+
+    override fun createBundle() = bundleOf(FirebaseParam.VALUE to delay)
+}
+
 class RebootTimeSettingsEvent(private val rebootTime: Int) : DFUSettingsChangeEvent {
     override val eventName: String = "REBOOT_TIME_EVENT"
 
