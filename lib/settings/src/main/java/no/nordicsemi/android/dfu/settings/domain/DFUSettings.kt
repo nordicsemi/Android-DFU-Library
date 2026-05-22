@@ -44,6 +44,7 @@ data class DFUSettings(
     val externalMcuDfu: Boolean = false,
     val disableResume: Boolean = false,
     val prepareDataObjectDelay: Int = 0, // ms
+    val executeInitDelay: Int = 0, // ms
     val rebootTime: Int = 0, // ms
     val scanTimeout: Int = 6_000, // ms
     val mtuRequestEnabled: Boolean = true,

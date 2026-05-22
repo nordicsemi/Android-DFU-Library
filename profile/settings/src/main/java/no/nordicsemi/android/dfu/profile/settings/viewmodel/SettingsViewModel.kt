@@ -71,6 +71,7 @@ internal class SettingsViewModel @Inject constructor(
             OnForceScanningAddressesSwitchClick -> onForceScanningAddressesSwitchClick()
             is OnNumberOfPocketsChange -> onNumberOfPocketsChange(event.numberOfPockets)
             is OnPrepareDataObjectDelayChange -> onPrepareDataObjectDelayChange(event.delay)
+            is OnExecuteInitDelayChange -> onExecuteInitDelayChange(event.delay)
             is OnRebootTimeChange -> onRebootTimeChange(event.time)
             is OnScanTimeoutChange -> onScanTimeoutChange(event.timeout)
         }
@@ -142,6 +143,14 @@ internal class SettingsViewModel @Inject constructor(
             repository.storeSettings(newSettings)
         }
         analytics.logEvent(PrepareDataObjectDelaySettingsEvent(newSettings.prepareDataObjectDelay))
+    }
+
+    private fun onExecuteInitDelayChange(delay: Int) {
+        val newSettings = state.value.copy(executeInitDelay = delay)
+        viewModelScope.launch {
+            repository.storeSettings(newSettings)
+        }
+        analytics.logEvent(ExecuteInitDelaySettingsEvent(newSettings.executeInitDelay))
     }
 
     private fun onRebootTimeChange(rebootTime: Int) {

@@ -76,6 +76,7 @@ internal class DFUManager @Inject constructor(
 
             setForceScanningForNewAddressInLegacyDfu(settings.forceScanningInLegacyDfu)
             setPrepareDataObjectDelay(settings.prepareDataObjectDelay.toLong())
+            setExecuteInitDelay(settings.executeInitDelay.toLong())
             setRebootTime(settings.rebootTime.toLong())
             setScanTimeout(settings.scanTimeout.toLong())
             setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)

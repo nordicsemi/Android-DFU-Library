@@ -108,6 +108,7 @@ public final class DfuServiceInitiator {
 	private int numberOfRetries = 0; // 0 to be backwards compatible
 	private int mbrSize = DEFAULT_MBR_SIZE;
 	private long dataObjectDelay = 0; // initially disabled
+	private long executeInitDelay = 0; // initially disabled
 	private long rebootTime = 0; // ms
 	private long scanTimeout = DEFAULT_SCAN_TIMEOUT; // ms
 
@@ -242,6 +243,19 @@ public final class DfuServiceInitiator {
 	 */
 	public DfuServiceInitiator setPrepareDataObjectDelay(final long delay) {
 		this.dataObjectDelay = delay;
+		return this;
+	}
+
+	/**
+	 * This method sets the duration of a delay, that the service will wait after sending the
+	 * init packet and before executing it. The delay will be done after the init packet is sent
+	 * and before sending the execute command. The default value is 0, which disables this feature.
+	 *
+	 * @param delay the delay that the service will wait before executing the init packet in milliseconds.
+	 * @return the builder
+	 */
+	public DfuServiceInitiator setExecuteInitDelay(final long delay) {
+		this.executeInitDelay = delay;
 		return this;
 	}
 
@@ -870,6 +884,7 @@ public final class DfuServiceInitiator {
 		intent.putExtra(DfuBaseService.EXTRA_MAX_DFU_ATTEMPTS, numberOfRetries);
 		intent.putExtra(DfuBaseService.EXTRA_MBR_SIZE, mbrSize);
 		intent.putExtra(DfuBaseService.EXTRA_DATA_OBJECT_DELAY, dataObjectDelay);
+		intent.putExtra(DfuBaseService.EXTRA_INIT_EXECUTE_DELAY, executeInitDelay);
 		intent.putExtra(DfuBaseService.EXTRA_SCAN_TIMEOUT, scanTimeout);
 		intent.putExtra(DfuBaseService.EXTRA_SCAN_DELAY, rebootTime);
 		if (mtu > 0)

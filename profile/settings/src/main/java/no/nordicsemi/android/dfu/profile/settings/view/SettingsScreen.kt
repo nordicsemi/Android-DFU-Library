@@ -157,6 +157,15 @@ internal fun SettingsScreen(
                 onChange = { onEvent(OnPrepareDataObjectDelayChange(it)) }
             )
 
+            SettingsTimeSlider(
+                text = stringResource(id = R.string.dfu_settings_execute_init_delay),
+                description = stringResource(id = R.string.dfu_settings_execute_init_delay_info),
+                value = state.executeInitDelay,
+                valueRange = 0..1000,
+                stepInMilliseconds = 100, // 0.1 seconds
+                onChange = { onEvent(OnExecuteInitDelayChange(it)) }
+            )
+
             Headline(stringResource(id = R.string.dfu_settings_headline_legacy_dfu))
 
             SettingsSwitch(
