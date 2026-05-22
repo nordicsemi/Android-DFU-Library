@@ -251,7 +251,7 @@ public final class DfuServiceInitiator {
 	 * init packet and before executing it. The delay will be done after the init packet is sent
 	 * and before sending the execute command. The default value is 0, which disables this feature.
 	 *
-	 * @param delay the delay that the service will wait before executing the init packet.
+	 * @param delay the delay that the service will wait before executing the init packet in milliseconds.
 	 * @return the builder
 	 */
 	public DfuServiceInitiator setExecuteInitDelay(final long delay) {
