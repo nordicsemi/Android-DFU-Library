@@ -569,6 +569,8 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 							// At this point, the error flag should be cleared, and the subsequent process can be executed normally.
 							mRemoteErrorOccurred = false;
 						}
+						// The mark is still at the start of the object just executed, and a lost-bytes or CRC retry resets to it
+						mFirmwareStream.mark(info.maxSize);
 					} else {
 						resumeSendingData = true;
 					}
