@@ -201,6 +201,8 @@ public class GattError {
 				return "DFU CRC ERROR";
 			case DfuBaseService.ERROR_DEVICE_NOT_BONDED:
 				return "DFU DEVICE NOT BONDED";
+			case DfuBaseService.ERROR_PROGRESS_LOST:
+				return "DFU PROGRESS LOST";
 			default:
 				return "UNKNOWN (" + error + ")";
 		}

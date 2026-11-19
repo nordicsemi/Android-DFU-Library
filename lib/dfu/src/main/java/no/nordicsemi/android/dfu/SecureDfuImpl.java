@@ -122,7 +122,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 								mFirmwareUploadInProgress = false;
 								notifyLock();
 								return;
-							} // else will be handled by sendFirmware(gatt) below
+							} // else will be handled by sendFirmware() below
 						}
 						handlePacketReceiptNotification(gatt, characteristic, value);
 						break;
@@ -248,7 +248,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 				logi("Resume feature disabled. Performing fresh DFU");
 			}
 			try {
-				sendInitPacket(gatt, allowResume);
+				sendInitPacket(allowResume);
 			} catch (final RemoteDfuException e) {
 				// If the SD+BL upload failed, we may still be able to upload the App.
 				// The SD+BL might have been updated before.
@@ -269,13 +269,13 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 					mImageSizeInBytes = zhis.applicationImageSize();
 					mProgressInfo.init(mImageSizeInBytes, 2, 2);
 
-					sendInitPacket(gatt, false);
+					sendInitPacket(false);
 				} else {
 					// There's noting we could do about it.
 					throw e;
 				}
 			}
-			sendFirmware(gatt);
+			sendFirmware();
 
 			// The device will reset so we don't have to send Disconnect signal.
 			mProgressInfo.setProgress(DfuBaseService.PROGRESS_DISCONNECTING);
@@ -337,7 +337,6 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 	 * Sending of the Init packet is done without using PRNs (Packet Receipt Notifications),
      * so they are disabled prior to sending the data.
 	 *
-	 * @param gatt        the target GATT device.
 	 * @param allowResume true to allow resuming sending Init Packet. If false, it will be started
      *                    again.
 	 * @throws RemoteDfuException
@@ -346,7 +345,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 	 * @throws UploadAbortedException
 	 * @throws UnknownResponseException
 	 */
-	private void sendInitPacket(@NonNull final BluetoothGatt gatt, final boolean allowResume)
+	private void sendInitPacket(final boolean allowResume)
 			throws RemoteDfuException, DeviceDisconnectedException, DfuException, UploadAbortedException, UnknownResponseException {
 		final CRC32 crc32 = new CRC32(); // Used to calculate CRC32 of the Init packet
 		ObjectChecksum checksum;
@@ -405,8 +404,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 					info.offset = 0;
 				} catch (final IOException e1) {
 					loge("Error while resetting the init packet stream", e1);
-					mService.terminateConnection(gatt, DfuBaseService.ERROR_FILE_IO_EXCEPTION);
-					return;
+					throw new DfuException("Error while reading the file", DfuBaseService.ERROR_FILE_IO_EXCEPTION);
 				}
 			}
 		}
@@ -458,14 +456,12 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 							crc32.reset();
 						} catch (final IOException e) {
 							loge("Error while resetting the init packet stream", e);
-							mService.terminateConnection(gatt, DfuBaseService.ERROR_FILE_IO_EXCEPTION);
-							return;
+							throw new DfuException("Error while reading the file", DfuBaseService.ERROR_FILE_IO_EXCEPTION);
 						}
 					} else {
 						loge("CRC does not match!");
 						mService.sendLogBroadcast(DfuBaseService.LOG_LEVEL_ERROR, "CRC does not match!");
-						mService.terminateConnection(gatt, DfuBaseService.ERROR_CRC_ERROR);
-						return;
+						throw new DfuException("CRC does not match", DfuBaseService.ERROR_CRC_ERROR);
 					}
 				}
 			}
@@ -491,14 +487,13 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 	 *     <li>If the CRC and offset received match and the offset is equal to the firmware size,
      *     it will only send the Execute command.</li>
 	 * </ol>
-	 * @param gatt the target GATT device.
 	 * @throws RemoteDfuException
 	 * @throws DeviceDisconnectedException
 	 * @throws DfuException
 	 * @throws UploadAbortedException
 	 * @throws UnknownResponseException
 	 */
-	private void sendFirmware(final BluetoothGatt gatt) throws RemoteDfuException,
+	private void sendFirmware() throws RemoteDfuException,
             DeviceDisconnectedException, DfuException, UploadAbortedException, UnknownResponseException {
 		// Send the number of packets of firmware before receiving a receipt notification
 		int numberOfPacketsBeforeNotification = mPacketsBeforeNotification;
@@ -574,6 +569,8 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 							// At this point, the error flag should be cleared, and the subsequent process can be executed normally.
 							mRemoteErrorOccurred = false;
 						}
+						// The mark is still at the start of the object just executed, and a lost-bytes or CRC retry resets to it
+						mFirmwareStream.mark(info.maxSize);
 					} else {
 						resumeSendingData = true;
 					}
@@ -594,8 +591,7 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 				}
 			} catch (final IOException e) {
 				loge("Error while reading firmware stream", e);
-				mService.terminateConnection(gatt, DfuBaseService.ERROR_FILE_IO_EXCEPTION);
-				return;
+				throw new DfuException("Error while reading the file", DfuBaseService.ERROR_FILE_IO_EXCEPTION);
 			}
 		} else {
 			// Initialize the timer used to calculate the transfer speed
@@ -660,14 +656,12 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 						mProgressInfo.setBytesSent(checksum.offset);
 					} catch (final IOException e) {
 						loge("Error while reading firmware stream", e);
-						mService.terminateConnection(gatt, DfuBaseService.ERROR_FILE_IO_EXCEPTION);
-						return;
+						throw new DfuException("Error while reading the file", DfuBaseService.ERROR_FILE_IO_EXCEPTION);
 					} catch (final Throwable tr) {
 						// crash fix
 						// Check https://github.com/NordicSemiconductor/Android-DFU-Library/issues/229
 						loge("Progress lost. Bytes sent: " + mProgressInfo.getBytesSent(), tr);
-						mService.terminateConnection(gatt, DfuBaseService.ERROR_PROGRESS_LOST);
-						return;
+						throw new DfuException("Progress lost", DfuBaseService.ERROR_PROGRESS_LOST);
 					}
 					// To decrease the chance of loosing data next time let's set PRN to 1.
 					// This will make the update very long, but perhaps it will succeed.
@@ -710,14 +704,12 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 							mProgressInfo.setBytesSent(((ArchiveInputStream) mFirmwareStream).getBytesRead());
 						} catch (final IOException e) {
 							loge("Error while resetting the firmware stream", e);
-							mService.terminateConnection(gatt, DfuBaseService.ERROR_FILE_IO_EXCEPTION);
-							return;
+							throw new DfuException("Error while reading the file", DfuBaseService.ERROR_FILE_IO_EXCEPTION);
 						}
 					} else {
 						loge(crcFailMessage);
 						mService.sendLogBroadcast(DfuBaseService.LOG_LEVEL_ERROR, crcFailMessage);
-						mService.terminateConnection(gatt, DfuBaseService.ERROR_CRC_ERROR);
-						return;
+						throw new DfuException("CRC does not match", DfuBaseService.ERROR_CRC_ERROR);
 					}
 				}
 			}
