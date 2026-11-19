@@ -108,8 +108,22 @@ class SecureDfuImpl extends BaseCustomDfuImpl {
 				//noinspection SwitchStatementWithTooFewBranches
 				switch (requestType) {
 					case OP_CODE_CALCULATE_CHECKSUM_KEY: {
-						final int offset = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 3);
-						final int remoteCrc = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 3 + 4);
+						final int status = value[2] & 0xFF;
+						// A success carries the offset and CRC, and readChecksum reads an extended error's code from the 4th byte
+						final int minLength = status == DFU_STATUS_SUCCESS ? 3 + 4 + 4
+								: status == SecureDfuError.EXTENDED_ERROR ? 4 : 3;
+						if (value.length < minLength) {
+							loge("Invalid response: " + parse(value));
+							mError = DfuBaseService.ERROR_INVALID_RESPONSE;
+							break;
+						}
+						// An error carries no offset or CRC. Pass it to the waiting thread, which reports it.
+						if (status != DFU_STATUS_SUCCESS) {
+							handleNotification(gatt, characteristic, value);
+							break;
+						}
+						final int offset = unsignedBytesToInt(value, 3);
+						final int remoteCrc = unsignedBytesToInt(value, 3 + 4);
 						final int localCrc = (int) (((ArchiveInputStream) mFirmwareStream).getCrc32() & 0xFFFFFFFFL);
 						// Check whether local and remote CRC match
 						if (localCrc == remoteCrc) {
